@@ -1,4 +1,7 @@
-module HediosController #(parameter SLOT_COUNT = 0, parameter ACTION_COUNT = 0)
+module HediosController #(
+    parameter SLOT_COUNT = 0, 
+    parameter VAR_ACTION_COUNT = 0, 
+    parameter VARLESS_ACTION_COUNT = 0)
     (
     input clk,
     input rst,
@@ -18,14 +21,34 @@ module HediosController #(parameter SLOT_COUNT = 0, parameter ACTION_COUNT = 0)
     output reg [31:0] tx_data,
     output reg tx_push_packet,
 
-    // Hedios action
-    input send_ping,
-    input[SLOT_COUNT-1:0][31:0] slots,
-    output reg rst_device,
-    output reg [ACTION_COUNT-1:0] configurable_actions,
-    output reg [31:0] action_argument,
 
-    output reg [7:0] last_command
+    input send_ping,
+    output reg rst_device,
+
+    // Hedios slot (TODO : write documentation for a hedios slot)
+    input[SLOT_COUNT-1:0][31:0] slots,
+
+    // Hedios action
+    /*
+    An hedios action can be of two type :
+        - an action with a 32-bit parameter (VARLESS_ACTION)
+        - an simpler action, without any parameter (VAR_ACTION)
+        
+    To toggle an action, the hedios client send the command 0b1pxxxxxx
+    If p is high, the action is an action with parameter, else it's a simple action
+    The 6 last bits are the action id, which allows for 64 actions of each type.
+
+    If the action is a VAR_ACTION, the packet data contains the 32-bits parameter
+
+    When an action idx is received, the HediosController sends a one tick pulse on var_actions[idx]
+    The module HediosActionHandler, instanciated in the HediosEndpoint, toogle on this pulse an output.
+    This output can be toggled back by the fpga logic upon completion of the action
+
+    The var_action_parameter[VAR_ACTION_COUNT-1:0][31:0] is directly exposed through the HediosEndpoint to exterior logic
+     */
+    output reg [VAR_ACTION_COUNT-1:0] var_actions,
+    output reg [VAR_ACTION_COUNT-1:0][31:0] var_action_parameter ,
+    output reg [VARLESS_ACTION_COUNT-1:0] varless_actions
 
 );
 
@@ -34,7 +57,23 @@ module HediosController #(parameter SLOT_COUNT = 0, parameter ACTION_COUNT = 0)
                 C_UPDATE_SLOT = 8'h02, // The slot id to update is given by the 7 low bits of the packet data
                 C_UPDATE_ALL_SLOT = 8'h03,
                 C_ASK_SLOT_COUNT = 8'h04,
-                C_RESET = 8'b10101010;
+                C_ASK_ACTION_COUNT = 8'h05,
+                C_RESET = 8'b01010101;
+
+    // Command sent by the endpoint
+    localparam  HDC_PING            = 8'h01,
+                HDC_DONE            = 8'h02,
+                HDC_PONG            = 8'h03,
+                HDC_LOG             = 8'h04,
+                HDC_SLOT_COUNT      = 8'h05,
+                HDC_ACTION_COUNT    = 8'h06,
+                HDC_ERROR           = 8'h08,
+                HDC_INVALID_SLOT    = 8'h09,
+                HDC_INVALID_ACTION  = 8'h0a,
+                HDC_UNKNOWN_COMMAND = 8'h0b;
+                
+
+    
     
 
     // FSM states
@@ -50,7 +89,10 @@ module HediosController #(parameter SLOT_COUNT = 0, parameter ACTION_COUNT = 0)
     reg[4:0] sm_state;
     reg[7:0] slot_counter;
     wire[7:0] fst_byte = rx_data[7:0];
+
+    integer i;
     
+
     always @(posedge clk or posedge rst) begin
         if (rst) begin
             sm_state         <= IDLE;
@@ -60,9 +102,12 @@ module HediosController #(parameter SLOT_COUNT = 0, parameter ACTION_COUNT = 0)
             tx_command          <= 0;
             tx_data             <= 0;
             rst_device          <= 0;
-            configurable_actions<= 0;
-            action_argument     <= 0;
-            last_command        <= 0;
+            var_actions         <= 0;
+            varless_actions     <= 0;
+            for (i = 0; i < VAR_ACTION_COUNT; i  = i + 1) begin
+                var_action_parameter[i] <= 0;
+            end
+            
         end
 
         else begin
@@ -70,6 +115,8 @@ module HediosController #(parameter SLOT_COUNT = 0, parameter ACTION_COUNT = 0)
             rx_pop_packet   <= 0;
             tx_push_packet  <= 0;
             rst_device      <= 0;
+            var_actions     <= 0;
+            varless_actions <= 0;
 
             
             case (sm_state)
@@ -90,12 +137,24 @@ module HediosController #(parameter SLOT_COUNT = 0, parameter ACTION_COUNT = 0)
 
                 DECODE_PACKET : begin
 
-                    last_command <= rx_command;
+                    // HediosAction handling
+                    if (rx_command[7]) begin // Check if the packet is an HediosAction packet
+
+                        if (rx_command[6]) begin // Check if it's a var action
+                            var_actions[rx_command[5:0]] <= 1;
+                            var_action_parameter[rx_command[5:0]] <= rx_data;
+                        end
+                        else varless_actions[rx_command[5:0]] <= 1;
+
+                        sm_state <= IDLE;
+                        
+                    end else begin
+
                     case (rx_command)
 
                         C_PING : begin
                             sm_state <= CLEAN_EARLY;
-                            tx_command <= 8'b00000011; // Send a pong HDC_PONG
+                            tx_command <= HDC_PONG;
                             tx_push_packet <= 1;
                         end
 
@@ -103,7 +162,7 @@ module HediosController #(parameter SLOT_COUNT = 0, parameter ACTION_COUNT = 0)
                             sm_state <= CLEAN_EARLY;
                             
                             if (fst_byte >= SLOT_COUNT) begin
-                                tx_command <= 8'b00001001; // Send invalid slot HDC_INVALID_SLOT
+                                tx_command <= HDC_INVALID_SLOT;
                                 
                             end else begin
                                 tx_command <= {1, fst_byte[6:0]}; // Send an update slot, with slot id (HDC_UPDATE_VALUE)
@@ -120,8 +179,15 @@ module HediosController #(parameter SLOT_COUNT = 0, parameter ACTION_COUNT = 0)
                         end
 
                         C_ASK_SLOT_COUNT : begin
-                            tx_command <= 8'b00000101; // HDC_SLOT_COUNT
+                            tx_command <= HDC_SLOT_COUNT; // HDC_SLOT_COUNT
                             tx_data <= {24'b0, SLOT_COUNT};
+                            tx_push_packet <= 1;
+                            sm_state <= CLEAN_EARLY;
+                        end
+
+                        C_ASK_ACTION_COUNT : begin
+                            tx_command <= HDC_ACTION_COUNT;
+                            tx_data <= {16'b0,  VARLESS_ACTION_COUNT[7:0],  VAR_ACTION_COUNT[7:0]};
                             tx_push_packet <= 1;
                             sm_state <= CLEAN_EARLY;
                         end
@@ -132,12 +198,12 @@ module HediosController #(parameter SLOT_COUNT = 0, parameter ACTION_COUNT = 0)
                         end
 
                         default : begin
-                            tx_command <= 8'b00001100; // HDC_UNKNOWN_COMMAND
+                            tx_command <= HDC_UNKNOWN_COMMAND; // HDC_UNKNOWN_COMMAND
                             tx_push_packet <= 1;
                             sm_state <= CLEAN_EARLY;
                         end
                     endcase
-                end
+                end end
 
                 CLEAN_EARLY : begin
                     tx_push_packet <= 0;
@@ -156,7 +222,6 @@ module HediosController #(parameter SLOT_COUNT = 0, parameter ACTION_COUNT = 0)
                         if (!rx_full && !tx_push_packet) begin
                             tx_push_packet <= 1;
                             tx_command <= {1, slot_counter[6:0]};
-                            last_command <= {1, slot_counter[6:0]};
                             tx_data <= slots[slot_counter];
                             slot_counter <= slot_counter + 1;
                             sm_state <= WAIT_BTWN_SLOTS;

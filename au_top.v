@@ -5,6 +5,7 @@ module au_top(
     input usb_rx,
     input[2:0][7:0] io_dip,
 
+    output[7:0] led,
     output[3:0] io_select,
     output[7:0] io_segment,
     output[2:0][7:0] io_led,
@@ -54,25 +55,28 @@ module au_top(
         .out(send_ping)
     );
 
+    localparam VARLESS_ACTION_COUNT = 1;
+    
 
     wire [7:0] packet_sent;
+    wire [VARLESS_ACTION_COUNT-1:0] varless_action;
+
     HediosEndpoint #(
         .CLK_RATE(100_000_000),
         .BAUD_RATE(1_000_000),
         .SLOT_COUNT(5),
-        .ACTION_COUNT(0)
+        .VAR_ACTION_COUNT(0),
+        .VARLESS_ACTION_COUNT(VARLESS_ACTION_COUNT)
     ) HediosEndpoint_instance (
         .clk(clk),
         .rst(rst),
         .rx_line(usb_rx),
         .tx_line(usb_tx),
         .hedios_slots(hedios_slots),
-        .hedios_actions(),
-        .action_argument(),
         .send_ping(send_ping),
         .rst_device(hedios_rst),
-        .last_command(io_led[2]),
-        .packet_sent(packet_sent)
+        .packet_sent(packet_sent),
+        .varless_action_out(varless_action)
     );
 
     display display_instance (
@@ -94,6 +98,7 @@ module au_top(
     assign hedios_slots[71:64] = io_dip[2];
     assign hedios_slots[103:96] = counter;
     assign hedios_slots[135:128] = counter;
+    assign led = {8{varless_action[0]}};
 
     
     
