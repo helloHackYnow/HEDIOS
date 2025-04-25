@@ -1,0 +1,4 @@
+*.prefs
+.library_mapping.xml
+.project
+.vscode
