@@ -9,7 +9,7 @@ module HediosController #(
     // Hedios serial rx
     input rx_empty,
     input rx_full,
-    input rx_lost_data,
+    input rx_lost_data, // (TODO : implement lost data callback)
     input[7:0] rx_command,
     input[31:0] rx_data,
     output reg rx_pop_packet,
@@ -31,8 +31,8 @@ module HediosController #(
     // Hedios action
     /*
     An hedios action can be of two type :
-        - an action with a 32-bit parameter (VARLESS_ACTION)
-        - an simpler action, without any parameter (VAR_ACTION)
+        - an action with a 32-bit parameter (VAR_ACTION)
+        - an simpler action, without any parameter (VARLESS_ACTION)
         
     To toggle an action, the hedios client send the command 0b1pxxxxxx
     If p is high, the action is an action with parameter, else it's a simple action
@@ -90,10 +90,13 @@ module HediosController #(
     reg[7:0] slot_counter;
     wire[7:0] fst_byte = rx_data[7:0];
 
+    wire[7:0] var_action_count = VAR_ACTION_COUNT;
+    wire [7:0] varless_action_count = VARLESS_ACTION_COUNT;
+
     integer i;
     
 
-    always @(posedge clk or posedge rst) begin
+    always @(posedge clk or posedge rst) begin // @suppress "Behavior-specific 'always' should be used instead of general purpose 'always'"
         if (rst) begin
             sm_state         <= IDLE;
             slot_counter        <= 0;
@@ -187,7 +190,7 @@ module HediosController #(
 
                         C_ASK_ACTION_COUNT : begin
                             tx_command <= HDC_ACTION_COUNT;
-                            tx_data <= {16'b0,  VARLESS_ACTION_COUNT[7:0],  VAR_ACTION_COUNT[7:0]};
+                            tx_data <= {16'b0, varless_action_count, var_action_count};
                             tx_push_packet <= 1;
                             sm_state <= CLEAN_EARLY;
                         end

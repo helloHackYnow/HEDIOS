@@ -35,7 +35,7 @@ module serial_str#(
     reg[$clog2(max_m_len):0] m_len = 0;
     
     
-    always @ (posedge clk or posedge rst) begin
+    always @ (posedge clk or posedge rst) begin // @suppress "Behavior-specific 'always' should be used instead of general purpose 'always'"
         if(rst) begin // Reset block
             tx_data <= 0;
             tx_start <= 0;

@@ -81,7 +81,7 @@ module HediosSerial_TX #(parameter BAUD_RATE = 1_000_000) (
         .o_done(tx_done)
     );
 
-    always @(posedge clk) begin
+    always @(posedge clk) begin // @suppress "Behavior-specific 'always' should be used instead of general purpose 'always'"
         if(rst) begin
             sm_state <= IDLE;
             fifo_pop     <= 0;

@@ -74,8 +74,8 @@ module HediosEndpoint #(
 
     HediosController #(
         .SLOT_COUNT(SLOT_COUNT),
-        .VAR_ACTION_COUNT(0),
-        .VARLESS_ACTION_COUNT(0)
+        .VAR_ACTION_COUNT(VAR_ACTION_COUNT),
+        .VARLESS_ACTION_COUNT(VARLESS_ACTION_COUNT)
     ) HediosController_instance (
         .clk(clk),
         .rst(rst),

@@ -55,7 +55,7 @@ module au_top(
         .out(send_ping)
     );
 
-    localparam VARLESS_ACTION_COUNT = 1;
+    localparam VARLESS_ACTION_COUNT = 5;
     
 
     wire [7:0] packet_sent;
@@ -86,7 +86,7 @@ module au_top(
         .io_segment(io_segment)
     );
 
-    always @(posedge slower_clock or posedge rst) begin
+    always @(posedge slower_clock or posedge rst) begin // @suppress "Behavior-specific 'always' should be used instead of general purpose 'always'"
         if (rst) counter <= 0;
         else counter <= counter + 1;
     end

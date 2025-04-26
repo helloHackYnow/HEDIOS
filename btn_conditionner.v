@@ -36,7 +36,7 @@ module btn_conditionner #(
         stage_q = {STAGES{1'b1}};
     end
 
-    always @(posedge clk) begin
+    always @(posedge clk) begin // @suppress "Behavior-specific 'always' should be used instead of general purpose 'always'"
         if (in) begin
             // If button is high, reset all stages to 1
             stage_q <= {STAGES{1'b1}};

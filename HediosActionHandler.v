@@ -16,7 +16,7 @@ module HediosActionHandler #(
 
 integer i;
 
-always @(posedge clk) begin
+always @(posedge clk) begin // @suppress "Behavior-specific 'always' should be used instead of general purpose 'always'"
     if (rst) begin
         var_action_out <= 0;
         varless_action_out <= 0;

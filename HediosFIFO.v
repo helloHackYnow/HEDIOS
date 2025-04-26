@@ -32,7 +32,7 @@ module HediosFIFO #(
     assign full = (count == max_capacity);
     
     // Write pointer logic
-    always @(posedge clk) begin
+    always @(posedge clk) begin // @suppress "Behavior-specific 'always' should be used instead of general purpose 'always'"
         if (rst) begin
             wr_ptr <= 0;
         end else if ((push_packet && !full) || (push_packet && pop_packet)) begin
@@ -43,7 +43,7 @@ module HediosFIFO #(
     end
 
     // Read pointer logic
-    always @(posedge clk) begin
+    always @(posedge clk) begin // @suppress "Behavior-specific 'always' should be used instead of general purpose 'always'"
         if (rst) begin
             rd_ptr <= 0;
             o_packet_command <= 0;
@@ -56,7 +56,7 @@ module HediosFIFO #(
     end
     
     // FIFO count logic
-    always @(posedge clk) begin
+    always @(posedge clk) begin // @suppress "Behavior-specific 'always' should be used instead of general purpose 'always'"
         if (rst) begin
             count <= 0;
         end else begin

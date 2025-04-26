@@ -29,7 +29,7 @@ module serial_rx #(
     reg[2:0] sm_state = IDLE;
         
     
-    always @ (posedge clk or posedge rst) begin
+    always @ (posedge clk or posedge rst) begin // @suppress "Behavior-specific 'always' should be used instead of general purpose 'always'"
         if (rst) begin    
             o_receiving <= 0;
             o_done <= 0;

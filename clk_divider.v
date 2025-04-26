@@ -7,7 +7,7 @@ module clk_divider #(parameter divider = 8)(
     localparam half_clk = divider >> 1;
     reg[$clog2(half_clk):0] clk_counter = 0;
     
-    always @(posedge clk or posedge rst) begin
+    always @(posedge clk or posedge rst) begin // @suppress "Behavior-specific 'always' should be used instead of general purpose 'always'"
         if(rst) begin 
             clk_counter <= 0; 
             out <= 0; 

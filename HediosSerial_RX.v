@@ -71,7 +71,7 @@ module HediosSerial_RX(
 
 
 
-    always @(posedge clk or posedge rst) begin
+    always @(posedge clk or posedge rst) begin // @suppress "Behavior-specific 'always' should be used instead of general purpose 'always'"
         if (rst) begin
             sm_state <= IDLE;
             received_bytes <= 0;

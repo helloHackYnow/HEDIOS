@@ -26,7 +26,7 @@ module serial_tx #(
     reg [$clog2(TICK_PER_BIT):0] clk_counter = 0;
     reg [$clog2(data_bit_count):0] sent_counter = 0;
 
-    always @(posedge clk) begin
+    always @(posedge clk) begin // @suppress "Behavior-specific 'always' should be used instead of general purpose 'always'"
         case (sm_state)
             IDLE: begin
                 o_done <= 0;

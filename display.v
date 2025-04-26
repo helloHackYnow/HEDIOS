@@ -11,7 +11,7 @@ module display(
     
     m_hex_decoder decoder(.in(current_digit), .out(io_segment));
     
-    always @ (posedge clk) begin
+    always @ (posedge clk) begin // @suppress "Behavior-specific 'always' should be used instead of general purpose 'always'"
         if (counter[14]) begin
             counter[14:0] <= 15'b0;
             selected <= selected + 1;
@@ -22,7 +22,7 @@ module display(
     end
     
          
-    always @ (selected) begin
+    always @ (selected) begin // @suppress "Behavior-specific 'always' should be used instead of general purpose 'always'"
         case(selected)
             2'b00 : begin 
                 io_select = 4'b1110; 

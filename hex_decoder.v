@@ -3,7 +3,7 @@ module m_hex_decoder(
     output reg [7:0] out
     );
     
-    always @ (in)
+    always @ (in) // @suppress "Behavior-specific 'always' should be used instead of general purpose 'always'"
     begin
         case (in)
             4'h0 : out = 8'b11000000; // '0'
