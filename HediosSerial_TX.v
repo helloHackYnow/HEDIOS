@@ -8,10 +8,7 @@ module HediosSerial_TX #(parameter BAUD_RATE = 1_000_000) (
 
     output queue_full,
     output queue_empty,
-    output tx_line,
-
-
-    output reg [7:0] packet_sent
+    output tx_line
 );
 
     localparam  IDLE = 3'b000,
@@ -86,7 +83,6 @@ module HediosSerial_TX #(parameter BAUD_RATE = 1_000_000) (
             sm_state <= IDLE;
             fifo_pop     <= 0;
             str_command  <= 0;
-            packet_sent <= 0;
         end
         else begin
 
@@ -99,7 +95,6 @@ module HediosSerial_TX #(parameter BAUD_RATE = 1_000_000) (
                     if(~fifo_empty) begin
                         sm_state <= START_PACKET;
                         fifo_pop <= 1;
-                        packet_sent <= packet_sent + 1;
                     end
                 end
 

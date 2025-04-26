@@ -15,7 +15,6 @@ module au_top(
     
     wire rst_btn;
     wire rst;
-    wire send_ping;
     reg[7:0] counter;
     
     btn_conditionner #(
@@ -47,18 +46,7 @@ module au_top(
         .out(slower_clock)
     );
 
-    btn_conditionner #(
-        .STAGES(4)
-    ) btn_conditionner_instance (
-        .clk(slow_clock),
-        .in(~io_button[1]),
-        .out(send_ping)
-    );
-
     localparam VARLESS_ACTION_COUNT = 5;
-    
-
-    wire [7:0] packet_sent;
     wire [VARLESS_ACTION_COUNT-1:0] varless_action;
 
     HediosEndpoint #(
@@ -73,17 +61,8 @@ module au_top(
         .rx_line(usb_rx),
         .tx_line(usb_tx),
         .hedios_slots(hedios_slots),
-        .send_ping(send_ping),
         .rst_device(hedios_rst),
-        .packet_sent(packet_sent),
         .varless_action_out(varless_action)
-    );
-
-    display display_instance (
-        .clk(clk),
-        .in({8'b0, packet_sent}),
-        .io_select(io_select),
-        .io_segment(io_segment)
     );
 
     always @(posedge slower_clock or posedge rst) begin // @suppress "Behavior-specific 'always' should be used instead of general purpose 'always'"

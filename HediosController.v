@@ -9,7 +9,7 @@ module HediosController #(
     // Hedios serial rx
     input rx_empty,
     input rx_full,
-    input rx_lost_data, // (TODO : implement lost data callback)
+    input rx_lost_data, // (TODO : implement )
     input[7:0] rx_command,
     input[31:0] rx_data,
     output reg rx_pop_packet,
@@ -21,8 +21,6 @@ module HediosController #(
     output reg [31:0] tx_data,
     output reg tx_push_packet,
 
-
-    input send_ping,
     output reg rst_device,
 
     // Hedios slot (TODO : write documentation for a hedios slot)

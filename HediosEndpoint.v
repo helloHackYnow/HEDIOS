@@ -22,12 +22,7 @@ module HediosEndpoint #(
     output [VARLESS_ACTION_COUNT-1:0] varless_action_out,
 
     output [VAR_ACTION_COUNT-1:0][31:0] var_action_parameters,
-
-    input send_ping,
-    output rst_device,
-
-
-    output [7:0] packet_sent
+    output rst_device
 );
 
     // serial rx wires
@@ -56,8 +51,7 @@ module HediosEndpoint #(
         .push_packet(tx_push_packet),
         .queue_full(tx_full),
         .queue_empty(tx_empty),
-        .tx_line(tx_line),
-        .packet_sent(packet_sent)
+        .tx_line(tx_line)
     );
 
     HediosSerial_RX HediosSerial_RX_instance (
@@ -90,7 +84,6 @@ module HediosEndpoint #(
         .tx_command(tx_command),
         .tx_data(tx_data),
         .tx_push_packet(tx_push_packet),
-        .send_ping(send_ping),
         .slots(hedios_slots),
         .rst_device(rst_device),
         .var_actions(var_action_inside),
