@@ -6,8 +6,6 @@ module au_top(
     input[2:0][7:0] io_dip,
 
     output[7:0] led,
-    output[3:0] io_select,
-    output[7:0] io_segment,
     output[2:0][7:0] io_led,
     output usb_tx
 
