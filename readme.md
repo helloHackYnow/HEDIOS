@@ -61,4 +61,4 @@ VAR_ACTION are more complex : in addition to the 1 bit endpoint output, there is
 | HTD_UPDATE_ALL_SLOTS | 0b00000011| Request an update for all the opened slots.                            | Implemented |
 | HTD_ASK_SLOT_COUNT| 0b00000100   | Request a HDC_SLOT_COUNT awnser.                                       | Implemented |
 | HTD_ASK_ACTION_COUNT | 0b00000101| Request a HDC_ACTION_COUNT awnser.                                     | Implemented |
-| HTD_SEND_ACTION   | 0b1vxxxxxx   | Send a action. If p is 1, it's a VAR_ACTION, else it's a VARLESS_ACTION| Implemented |
+| HTD_SEND_ACTION   | 0b1Vxxxxxx   | Send a action. If *V* is 1, it's a VAR_ACTION, else it's a VARLESS_ACTION. The last 6 bits are the id of the action.| Implemented |
