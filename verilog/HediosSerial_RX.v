@@ -1,4 +1,8 @@
-module HediosSerial_RX(
+module HediosSerial_RX
+    #(
+        parameter CLK_RATE = 100_000_000,
+        parameter BAUD_RATE = 1_000_000
+    )(
     input clk,
     input rst,
 
@@ -57,8 +61,8 @@ module HediosSerial_RX(
     );
 
     serial_rx #(
-        .clk_rate(100_000_000),
-        .baud_rate(1_000_000),
+        .clk_rate(CLK_RATE),
+        .baud_rate(BAUD_RATE),
         .data_bit_count(8)
     ) serial_rx_instance (
         .clk(clk),

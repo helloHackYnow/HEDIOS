@@ -42,6 +42,7 @@ module HediosEndpoint #(
 
 
     HediosSerial_TX #(
+        .CLK_RATE(CLK_RATE),
         .BAUD_RATE(BAUD_RATE)
     ) HediosSerial_TX_instance (
         .clk(clk),

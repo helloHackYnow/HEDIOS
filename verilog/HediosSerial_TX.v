@@ -1,4 +1,4 @@
-module HediosSerial_TX #(parameter BAUD_RATE = 1_000_000) (
+module HediosSerial_TX #(parameter CLK_RATE = 100_000_000, parameter BAUD_RATE = 1_000_000) (
     input clk,
     input rst,
 
@@ -65,7 +65,7 @@ module HediosSerial_TX #(parameter BAUD_RATE = 1_000_000) (
     );
 
     serial_tx #(
-        .clk_rate(100_000_000),
+        .clk_rate(CLK_RATE),
         .baud_rate(BAUD_RATE),
         .data_bit_count(8)
     ) serial_tx_instance (
