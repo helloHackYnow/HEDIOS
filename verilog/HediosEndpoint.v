@@ -55,7 +55,10 @@ module HediosEndpoint #(
         .tx_line(tx_line)
     );
 
-    HediosSerial_RX HediosSerial_RX_instance (
+    HediosSerial_RX#(
+        .CLK_RATE(CLK_RATE),
+        .BAUD_RATE(BAUD_RATE)
+    )  HediosSerial_RX_instance (
         .clk(clk),
         .rst(rst),
         .rx_line(rx_line),
