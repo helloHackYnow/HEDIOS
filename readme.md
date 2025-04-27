@@ -1,5 +1,13 @@
 # The hedios protocol
 
+## Disclaimer 
+
+This repo is the result of a bit less than a week of work. I am aware of the incompleteness of this protocol, but it's still in is infant stage.
+
+I will happily accept any form of suggestion to this project, on which I can only work on my spare time.
+
+You can find the associated cpp client [here](https://github.com/helloHackYnow/HEDIOS-client)
+
 ## Introduction
 
 The hedios protocol is a small uart based protocol I'm working on which allows simple bidirectionnal communication between a fpga and a computer. The main goal is to developp a plug and play set tools to streamline the debuging process of a fpga design.
