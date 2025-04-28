@@ -31,7 +31,7 @@ It's important to note that the packet are send following the little endian conv
 
 ### Hedios Slots
 
-A hedios slot is a 32 input on the endpoint, which can be connected, for example, to a register in the fpga's logic. The slot count is a parameter of the enpoint intance. The client can request the slot count of the endpoint, an update of a specific slot, or an update of all the slots.
+A hedios slot is a 32 input on the endpoint that can be sent through uart to the cpp client. It can be connected, for example, to a register in the fpga's logic. The slot count is a parameter of the enpoint intance. The client can request the slot count of the endpoint, an update of a specific slot, or an update of all the slots.
 
 ### Hedios Actions
 
