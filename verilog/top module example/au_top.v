@@ -25,8 +25,7 @@ module au_top(
 
     wire slow_clock;
     wire slower_clock;
-    wire hedios_rst;
-    wire[32*5-1:0] hedios_slots;
+    
 
     clk_divider #(
         .divider(4096)
@@ -44,6 +43,9 @@ module au_top(
         .out(slower_clock)
     );
 
+
+    wire hedios_rst;
+    wire[32*5-1:0] hedios_slots;
     localparam VARLESS_ACTION_COUNT = 5;
     wire [VARLESS_ACTION_COUNT-1:0] varless_action;
 
