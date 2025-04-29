@@ -48,6 +48,7 @@ module au_top(
     wire[32*5-1:0] hedios_slots;
     localparam VARLESS_ACTION_COUNT = 5;
     wire [VARLESS_ACTION_COUNT-1:0] varless_action;
+    wire [VARLESS_ACTION_COUNT*32-1:0] var_action_parameters;
 
     HediosEndpoint #(
         .CLK_RATE(100_000_000),
@@ -62,7 +63,8 @@ module au_top(
         .tx_line(usb_tx),
         .hedios_slots(hedios_slots),
         .rst_device(hedios_rst),
-        .varless_action_out(varless_action)
+        .varless_action_out(varless_action),
+        .var_action_parameters(var_action_parameters)
     );
 
     always @(posedge slower_clock or posedge rst) begin // @suppress "Behavior-specific 'always' should be used instead of general purpose 'always'"
@@ -77,7 +79,7 @@ module au_top(
     assign hedios_slots[71:64] = io_dip[2];
     assign hedios_slots[103:96] = counter;
     assign hedios_slots[135:128] = counter;
-    assign led = {8{varless_action[0]}};
+    assign led = var_action_parameters[7:0];
 
     
     
