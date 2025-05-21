@@ -13,8 +13,9 @@ module au_top(
     
     wire rst_btn;
     wire rst;
-    reg[7:0] counter;
-    
+
+    wire[15:0] reg_value;
+
     btn_conditionner #(
         .STAGES(4)
     ) rst_cond (
@@ -43,11 +44,27 @@ module au_top(
         .out(slower_clock)
     );
 
+    wire user_we_btn;
+
+    btn_conditionner #(
+        .STAGES(4)
+    ) btn_conditionner_instance (
+        .clk(slower_clock),
+        .in(io_button[1]),
+        .out(user_we_btn)
+    );
+
+    
+    
+
+    localparam SLOT_COUNT = 1;
+    
+
 
     wire hedios_rst;
-    wire[32*5-1:0] hedios_slots;
+    wire[32*SLOT_COUNT-1:0] hedios_slots;
 
-    localparam VARLESS_ACTION_COUNT = 0;
+    localparam VARLESS_ACTION_COUNT = 1;
     localparam VAR_ACTION_COUNT = 1;
 
     wire [VARLESS_ACTION_COUNT-1:0] varless_action;
@@ -57,7 +74,7 @@ module au_top(
     HediosEndpoint #(
         .CLK_RATE(100_000_000),
         .BAUD_RATE(1_000_000),
-        .SLOT_COUNT(5),
+        .SLOT_COUNT(SLOT_COUNT),
         .VAR_ACTION_COUNT(VAR_ACTION_COUNT),
         .VARLESS_ACTION_COUNT(VARLESS_ACTION_COUNT)
     ) HediosEndpoint_instance (
@@ -72,19 +89,24 @@ module au_top(
         .var_action_out(var_action)
     );
 
-    always @(posedge slower_clock or posedge rst) begin // @suppress "Behavior-specific 'always' should be used instead of general purpose 'always'"
-        if (rst) counter <= 0;
-        else counter <= counter + 1;
-    end
+    HediosRegister #(
+        .DEPTH(16)
+    ) HediosRegister_instance (
+        .clk(clk),
+        .rst(rst),
+        .hedios_in(var_action_parameters[15:0]),
+        .hedios_we(var_action[0]),
+        .user_in({io_dip[1], io_dip[0]}),
+        .user_we(user_we_btn | varless_action[0]),
+        .out(reg_value),
+        .race_condition()
+    );
 
-    assign rst = rst_btn || hedios_rst;
-    assign io_led[0] = counter;
-    assign hedios_slots[7:0] = io_dip[0];
-    assign hedios_slots[39:32] = io_dip[1];
-    assign hedios_slots[71:64] = io_dip[2];
-    assign hedios_slots[103:96] = counter;
-    assign hedios_slots[135:128] = counter;
-    assign led = var_action_parameters[7:0];
+    assign io_led[1:0] = reg_value;
+    
+
+
+
 
     
     
