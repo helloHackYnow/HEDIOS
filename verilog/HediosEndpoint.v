@@ -14,11 +14,10 @@ module HediosEndpoint #(
 
     input[SLOT_COUNT-1:0][31:0] hedios_slots,
 
-    // HediosAction
-    input [VAR_ACTION_COUNT-1:0] var_action_device, // Exposed to exterior logic, set by the device to toggle down a accounted for action signal
-    input [VARLESS_ACTION_COUNT-1:0] varless_action_device, // Idem
+    // Single tick pulse on the i_th bit when the corresponding action is received
+    output [VAR_ACTION_COUNT-1:0] var_action_out, 
 
-    output [VAR_ACTION_COUNT-1:0] var_action_out,
+    // Single tick pulse on the i_th bit when the corresponding action is received
     output [VARLESS_ACTION_COUNT-1:0] varless_action_out,
 
     output [VAR_ACTION_COUNT-1:0][31:0] var_action_parameters,
@@ -34,10 +33,6 @@ module HediosEndpoint #(
     wire tx_empty, tx_full, tx_push_packet;
     wire[7:0] tx_command;
     wire[31:0] tx_data;
-
-    // HediosAction wires
-    wire [VAR_ACTION_COUNT-1:0] var_action_inside;
-    wire [VARLESS_ACTION_COUNT-1:0] varless_action_inside;
 
 
 
@@ -90,24 +85,10 @@ module HediosEndpoint #(
         .tx_push_packet(tx_push_packet),
         .slots(hedios_slots),
         .rst_device(rst_device),
-        .var_actions(var_action_inside),
-        .varless_actions(varless_action_inside),
+        .var_actions(var_action_out),
+        .varless_actions(varless_action_out),
         .var_action_parameter(var_action_parameters)
 
-    );
-
-    HediosActionHandler #(
-        .VAR_ACTION_COUNT(VAR_ACTION_COUNT),
-        .VARLESS_ACTION_COUNT(VARLESS_ACTION_COUNT)
-    ) HediosActionHandler_instance (
-        .clk(clk),
-        .rst(rst),
-        .var_action_controller(var_action_inside),
-        .var_action_device(var_action_device),
-        .var_action_out(var_action_out),
-        .varless_action_controller(varless_action_inside),
-        .varless_action_device(varless_action_device),
-        .varless_action_out(varless_action_out)
     );
 
     

@@ -85,8 +85,6 @@ You can then instance the HediosEndpoint wherever you need it.
 | rst                       | 1                         | Reset signal                                              |
 | rx_line                   | 1                         | Used for the uart reception (client to fpga)              |
 | hedios_slots              | 32 * slot_count           | Are what is sent to the client                            |
-| var_action_device         | 1 * var_action_count      | Send a one tick pulse on var_action_device[i] to set var_action_out[i] to low. Is used to acknowledge of a command |
-| varless_action_device     | 1 * varless_action_count  | Same as for var_action_device                             |
 
 
 ### Outputs of the endpoint
@@ -94,7 +92,7 @@ You can then instance the HediosEndpoint wherever you need it.
 | Name                      | Size (bits)               | Description                                               |
 | ----                      | ----                      | -----------                                               |
 | tx_line                   | 1                         | Used for uart transmission (fpga to client)               |
-| var_action_out            | 1 * var_action_count      | var_action_out[i] is set to high when the client sends the corresponding var action to the fpga |
+| var_action_out            | 1 * var_action_count      | var_action_out[i] is set to high for a single tick when the client sends the corresponding var action to the fpga |
 | var_action_parameters     | 32 * var_action_count     | var_action_parameters[i] contains the parameter corresponding to the associated var_action |  
 | varless_action_out        | 1 * varless_action_count  | Same as for var_action_out                                |
 | rst_device                | 1                         | Is set to high when the client sends the rst command. Can be connected to the main reset line to allows for resetting the fpga from the client |

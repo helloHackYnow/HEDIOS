@@ -82,6 +82,7 @@ module HediosController #(
                 CLEAN_EARLY = 5'b00101,
                 EXEC_UPDATE_ALL_SLOT = 5'b00110,
                 WAIT_BTWN_SLOTS = 5'b00111,
+                SET_VAR_ACTION = 5'b01000, // Used to be sure the parameter is set before the pulse is sent
                 CLEAN = 5'b11111;
 
     reg[4:0] sm_state;
@@ -116,8 +117,8 @@ module HediosController #(
             rx_pop_packet   <= 0;
             tx_push_packet  <= 0;
             rst_device      <= 0;
-            var_actions     <= 0;
-            varless_actions <= 0;
+            var_actions     <= {VAR_ACTION_COUNT{1'b0}};
+            varless_actions <= {VARLESS_ACTION_COUNT{1'b0}};
 
             
             case (sm_state)
@@ -139,19 +140,25 @@ module HediosController #(
                 DECODE_PACKET : begin
 
                     // HediosAction handling
+                    //----------------------
                     if (rx_command[7]) begin // Check if the packet is an HediosAction packet
 
                         if (rx_command[6]) begin // Check if it's a var action
-                            var_actions[rx_command[5:0]] <= 1;
+                            sm_state <= SET_VAR_ACTION;
                             var_action_parameter[rx_command[5:0]] <= rx_data;
                         end
-                        else varless_actions[rx_command[5:0]] <= 1;
 
-                        sm_state <= IDLE;
-                        
-                    end else begin
+                        else begin
+                            varless_actions[rx_command[5:0]] <= 1;
+                            sm_state <= IDLE;
+                        end 
+    
+                    end else 
 
-                    case (rx_command)
+                
+                    // Any other kind of packet
+                    // ------------------------
+                    begin case (rx_command)
 
                         C_PING : begin
                             sm_state <= CLEAN_EARLY;
@@ -232,6 +239,11 @@ module HediosController #(
 
                 WAIT_BTWN_SLOTS : begin
                     sm_state <= EXEC_UPDATE_ALL_SLOT;
+                end
+
+                SET_VAR_ACTION : begin
+                    var_actions[rx_command[5:0]] <= 1;
+                    sm_state <= IDLE;
                 end
 
                 CLEAN : begin
